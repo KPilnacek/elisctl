@@ -8,6 +8,8 @@ from elisctl.schema.xlsx import SchemaToXlsx
 
 from . import transform, upload
 
+from elisctl.user import profile_option
+
 
 @click.group("schema")
 def cli() -> None:
@@ -25,6 +27,7 @@ cli.add_command(upload.upload_command)
 @click.option("--ensure-ascii", is_flag=True, type=bool)
 @click.option("--format", "format_", default="json", type=click.Choice(["json", "xlsx"]))
 @click.option("-O", "--output-file", type=click.File("wb"))
+@profile_option
 def download_command(
     ctx: click.Context,
     id_: str,
@@ -32,8 +35,9 @@ def download_command(
     ensure_ascii: bool,
     format_: str,
     output_file: Optional[IO[str]],
+    profile: Optional[str],
 ):
-    with APIClient() as api_client:
+    with APIClient(profile=profile) as api_client:
         schema_dict = get_json(api_client.get(f"schemas/{id_}"))
     if format_ == "json":
         schema_file = json.dumps(
